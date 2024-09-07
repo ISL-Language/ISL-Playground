@@ -1,0 +1,173 @@
+.syntax {
+  overflow: visible;
+  font-family: 'Courier New', Courier, monospace;
+  color: white;
+}
+
+.inline {
+  position: relative;
+  display: inline;
+}
+
+.textbox {
+  font-size: 15px;
+  max-width: 40em;
+  width: 40em;
+  word-wrap: break-word;
+  caret-color: white;
+}
+
+.syntax.box {
+  color: transparent;
+  background-color: transparent;
+  z-index: 2;
+  border: 0px transparent;
+  position: absolute;
+  box-shadow: none;
+  outline: none;
+}
+
+.syntax.textbox {
+  translate: 1.75px 1.5px;
+}
+
+.syntax.box{
+  pointer-events: none;
+}
+
+.syntax.box * {
+  pointer-events: auto;
+}
+
+.syntax::selection {
+  background: #7474744a;
+}
+
+.syntax.textbox:focus ~ .syntax.bg {
+  outline: none;
+  box-shadow: #0066ff55 0px 0px 0px 4px; /* glowwww */
+  border: solid #66a3ff 2px;
+}
+
+.syntax.bg {
+  z-index: 1;
+  background-color: #0e0e0e;
+  translate: 2px 2px;
+  min-height: 1.2rem;
+  font-size: 15px;
+  border: solid 2px #474747;
+}
+
+.syntax .keyword {
+  color: #2a65dc;
+}
+
+.syntax .custom.keyword {
+  color: #a941ff;
+}
+
+.syntax .string {
+  color: #e27712;
+}
+
+.syntax .colour {
+  color: #c2471e;
+}
+
+.syntax .number {
+  color: #51df95;
+}
+
+.syntax .relative {
+  color: #99fe34;
+}
+
+.syntax .type {
+  color: #00ffd5;
+}
+
+.syntax .parameter {
+  color: #eacd10;
+}
+
+.syntax .comment {
+  color: #00750e;
+}
+
+.syntax .operator {
+  color: #00d5ff;
+}
+
+.syntax .label {
+  color: #00b3ff;
+}
+
+.syntax .custom.label {
+  color: #b493fc;
+}
+
+.syntax .group {
+  color: #ff47b2;
+}
+
+.syntax .getter {
+  color: #fe7cf9;
+}
+
+.syntax .variable {
+  color: #ff6666;
+}
+
+.syntax .function {
+  color: #f0ff80;
+}
+
+.syntax .metatag {
+  color: #00ffff;
+}
+
+.syntax .warning {
+  text-decoration: wavy underline yellow;
+  color: inherit;
+}
+
+.syntax .warning:hover::after{
+  position: absolute;
+  margin-left: 5px;
+  background-color: #0e0e0e;
+  padding: 3px;
+  border: 1px solid #474747;
+  border-radius: 4px;
+  content: " ⚠";
+  color: white;
+  font-size: 0.7em;
+}
+
+.syntax .warning.no-type:hover::after{
+  content: " ⚠ Variable has no type.";
+}
+
+.syntax .warning.deprecated:hover::after{
+  content: " ⚠ Deprecated feature used.";
+}
+
+.syntax .error {
+  text-decoration: wavy underline red;
+  color: inherit;
+}
+
+.syntax .error:hover::after{
+  content: " ✖";
+  position: absolute;
+  margin-left: 5px;
+  background-color: #0e0e0e;
+  padding: 3px;
+  border: 1px solid #474747;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.7em;
+}
+
+.syntax .error.unrecognised:hover::after{
+  content: " ✖ Input not recognised.";
+}

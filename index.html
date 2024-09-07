@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>ISL Playground</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <link href="interface.css" rel="stylesheet" type="text/css" />
+  <link href="highlighting.css" rel="stylesheet" type="text/css" />
+  <link rel="icon" type="image/x-icon" href="isl-favicon.ico" />
+  <noscript>
+    <style>
+      .jsonly {
+        display: none !important;
+      }
+    </style>
+  </noscript>
+</head>
+
+<body>
+  <script src="./util/popup.js"></script>
+  <div class="container not-home">
+    <span><img src="minimalist-isl.png" width="50px" style="float: left" alt="ISL logo" />
+      <h1 style="translate: -25px 0.25lh">ISL Playground</h1>
+    </span>
+    <p>
+      <i>This playground's interpreter is kept up-to-date with the latest ISL
+        commit on GitHub automatically.</i>
+    </p>
+    <img title="Last commit to interpreter" alt="Last commit to interpreter"
+      src="https://img.shields.io/github/last-commit/LightningLaser8/ISL?path=core%2Finterpreter.js&style=flat" />
+    <br /><br />
+    <div class="accent-box">
+      <noscript style="color: red">Your browser does not support JavaScript!</noscript>
+      <div class="jsonly">
+        <h2>
+          Extensions
+          <popup-info content="Extras to add to the interpreter."></popup-info>
+        </h2>
+        <div>
+          <i style="color: yellow">⚠ Only import extensions you trust, they can cause damage your
+            computer.</i><br />
+          <span>Request an extension from a URL<popup-info
+              content="Request an extension from the URL specified. The URL should lead to a CDN link to a js module file, such as 'https://cdn.jsdelivr.net/gh/ LightningLaser8/ISL@main/modules/ extensions/graphics.js'. The extension name should be a property of the module, such as 'GraphicsExtension', or '*', which fetches all extension exports."></popup-info>:<br /></span>
+          <input type="url" id="ext-import-url" placeholder="Input URL of extension" style="width: 400px" /><input
+            type="text" id="ext-import-name" placeholder="Input name of extension" /><button
+            id="importExtension-button">Request</button>
+          <div id="ext-import-errors"></div>
+          <br />
+          <div class="lighter">
+            <b>Imported Extensions: </b><div id="ext-import-imported"></div>
+          </div>
+        </div>
+        <h2>
+          Console
+          <popup-info content="The interpreter's non-graphical output."></popup-info>
+        </h2>
+        <div id="isl-interface">
+          <textarea id="logs" class="textbox" placeholder="Console log will show here" readonly cols="80"
+            rows="10"></textarea>
+          <popup-info copy-style-from="./highlighting.css"
+            content='Any messages sent through the &lt;span class="inline syntax">&lt;span class="keyword">log&lt;/span>&lt;/span> (then &lt;span class="inline syntax">&lt;span class="keyword">flush&lt;/span>&lt;/span>) keyword will show here'></popup-info>
+          <br />
+          <textarea id="warnings" placeholder="Console warnings will show here" readonly class="warning-box textbox"
+            cols="80" rows="5"></textarea>
+          <popup-info copy-style-from="highlighting.css" content='Any warnings from the interpreter will show here, for example, disallowed operations
+            like &lt;span class="inline syntax">&lt;span class="keyword">import&lt;/span>&lt;/span> and &lt;span
+              class="inline syntax">&lt;span class="keyword">export&lt;/span>&lt;/span>.'></popup-info>
+
+          <br />
+          <textarea id="errors" placeholder="Console errors will show here" readonly class="error-box textbox" cols="80"
+            rows="10"></textarea>
+          <popup-info content="Any errors thrown by the interpreter will show here."></popup-info>
+          <br />
+          <button type="button" id="clearOutputs-button">
+            Clear Console
+            <popup-info content="Clear the contents of all output boxes."></popup-info>
+          </button>
+          <br />
+          <h2>Runtime</h2>
+          <div style="text-align: center; width: 40rem;">
+            <label for="speed-input">Delay</label>
+            <popup-info content="Set the delay between sets of instructions in milliseconds.
+            Bigger numbers mean slower execution."></popup-info>:
+            <input type="number" id="speed-input" value="1" style="width: 50px" />
+            <label for="instructions-input">Instructions</label>
+            <popup-info content="Set the number of instructions run at once. Bigger numbers mean
+            faster execution."></popup-info>:
+            <input type="number" id="instructions-input" value="30" style="width: 50px" />
+            <br />
+            <div id="controls" class="corrected">
+              Controls:
+              <button type="button" id="go-button">
+                Execute
+                <popup-info content="Load input ISL into interpreter, and start execution."></popup-info>
+              </button>
+              <button type="button" id="restart-button">
+                Restart
+                <popup-info content="Restart execution with the values in the settings boxes, but
+                without loading more ISL."></popup-info>
+              </button>
+              <button type="button" id="stop-button">
+                Stop <popup-info content="Stops execution."></popup-info>
+              </button>
+              <button type="button" id="pause-button">
+                Pause <popup-info content="Pauses execution."></popup-info>
+              </button>
+              <button type="button" id="resume-button">
+                Resume
+                <popup-info content="Resumes execution, without applying the new settings."></popup-info>
+              </button>
+              <button type="button" id="clear-button">
+                Clear
+                <popup-info content="Clears all ISL in the interpreter."></popup-info>
+              </button>
+            </div>
+            <br />
+            <popup-info content="Loads ISL from a file into the code input. Replaces current
+              content."></popup-info>
+            <label for="isl-loader-file-upload">Upload File</label>
+            <input type="file" id="isl-loader-file-upload" style="visibility: hidden; width: 0; height: 0" />
+            <label for="filename-input">Filename</label>
+            <popup-info content="Set the filename of the ISL file to download."></popup-info>:
+            <input type="text" id="filename-input" value="program" style="width: 100px" />.isl
+            <button type="button" id="save-button">
+              Save
+              <popup-info content="Downloads the inputted ISL to your computer as a
+              &lt;code>.isl&lt;/code> file."></popup-info>
+            </button>
+            <br />
+            <br />
+            <popup-info copy-style-from="highlighting.css" content='
+            <style>
+              .info{
+                background-color: #232323;
+              }
+              u {
+                color: white
+              }
+            </style>
+              <u>Syntax Highlighting Key:</u><br><br>
+              <span class="inline syntax">
+              <span class="deprecated warning">deprecated feature</span><br>
+              <span class="error">error (unknown)</span><br>
+              <span class="metatag">[meta tag]</span><br>
+              <span class="comment">//Comment</span><br>
+              <span class="label">label</span> <span class="keyword">keyword</span><br>
+              (Extension) <span class="custom label">label</span> <span class="custom keyword">keyword</span><br>
+              <span class="string">"string"</span><br>
+              <span class="number">number</span><br>
+              <span class="relative">~relative number</span><br>
+              <span class="getter">\getter\</span><br>
+              <span class="variable">variable</span><br>
+              <span class="function">function</span><br>
+              <span class="parameter">parameter</span><span class="type">:type</span><br>
+              <span class="operator">operator</span><br>
+              <span class="group">[gr|ou|p]</span><br>
+              <span class="colour">#colour</span><br>
+              </span>
+            ' txt="Syntax Highlighting"></popup-info>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="https://github.com/LightningLaser8/ISL/wiki" style="text-decoration: none; color: inherit;" class="external red">Learn ISL</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<div id="ext-import-wrapper" class="lighter"><b>Added Extensions:</b><br><div id="ext-import-added"></div></div>
+            <br />
+            <div id="container" class="nocenter corrected">
+              <textarea id="input" placeholder="Enter ISL code here" class="syntax box textbox" cols="80" rows="20"
+                oninput="delayedHighlight(this)" onkeydown="delayedHighlight(this)" onclick="delayedHighlight(this)"
+                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+              <div id="txt-bg" class="syntax bg textbox" onclick="document.getElementById('input').focus()">
+                <!-- All the processed text goes in here -->
+              </div>
+              <div id="offset"></div>
+            </div>
+            <br />
+            <script src="highlighting.js"></script>
+          </div>
+        </div>
+        <div id="isl-output">
+          <script src="script.js" type="module"></script>
+        </div>
+        <script src="textResize.js"></script>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

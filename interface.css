@@ -1,0 +1,91 @@
+body{
+  padding: 20px;
+}
+textarea {
+  background-color: #212121;
+  color: white;
+  resize: none;
+  font-family: 'Courier New', Courier, monospace;
+  border: 4px inset;
+}
+
+#controls {
+  background-color: #121212;
+  padding: 10px;
+  width: 37em;
+}
+
+.error-box {
+  background-color: #320000;
+  color: red;
+  border-color: #780000;
+}
+
+.warning-box {
+  background-color: #3d3d00;
+  color: yellow;
+  border-color: #808000;
+}
+
+#logs {
+  border-color: #676767;
+}
+
+#ext-import-imported {
+  width: 650px;
+  max-width: 650px;
+}
+#ext-import-added {
+  width: 150px;
+  max-width: 150px;
+  float: inline-end;
+}
+#ext-import-wrapper{
+  display: inline-block;
+}
+
+.nocenter {
+  text-align: left;
+  position: relative;
+}
+.corrected {
+  translate: 30px
+}
+.imported-extension{
+  display: inline-block;
+  background-color: black;
+  border: 2px outset white;
+  padding: 2px 5px;
+  margin-top: 3px;
+}
+
+button, input{
+  background-color: #070707;
+  color: red;
+}
+
+label[for="isl-loader-file-upload"]{
+  font-size: smaller;
+  padding: 2px 7px 2px 7px;
+  background-color: #070707;
+  border: 2px outset #070707;
+}
+
+label[for="isl-loader-file-upload"]:active{
+  border-style: inset;
+}
+
+#controls button{
+  background-color: #121212;
+}
+
+canvas {
+  translate: calc(50vw - 67%) 40px;
+  border: 5px ridge #525252;
+}
+canvas:hover {
+  border-color: #89dde2;
+}
+canvas:active {
+  border-color: #ecd85a;
+}
