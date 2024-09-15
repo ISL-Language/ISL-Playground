@@ -1,3 +1,8 @@
+/*
+Very basic syntax highlighting for ISL. Barely supports custom keywords, and sometimes ignores errors.
+But it works.
+ */
+
 //constants
 const keywords = [
   //Deprecated
@@ -36,23 +41,14 @@ const keywords = [
   "set",
   "delete",
   "import",
-  "export"
-]
-const customKeywords = []
-const labels = [
-  "non-destructive"
-]
-const customLabels = []
-const operators = [
-  "=",
-  "<",
-  ">",
-  "!=",
-  "in"
-]
+  "export",
+];
+const customKeywords = [];
+const labels = ["non-destructive"];
+const customLabels = [];
+const operators = ["=", "<", ">", "!=", "in"];
 const variableManipulators = [
   "var",
-
 
   "add",
   "subtract",
@@ -67,96 +63,117 @@ const variableManipulators = [
   "set",
   "delete",
   "getkeys",
-  "awaitkey"
-]
-const functionManipulators = [
-  "cmd",
-
-  "function",
-  "end",
-  "execute"
-]
+  "awaitkey",
+];
+const functionManipulators = ["cmd", "function", "end", "execute"];
 const warns = {
-  declare: ["deprecated","no-type"],
+  declare: ["deprecated", "no-type"],
   var: ["no-type"],
   webprompt: ["deprecated"],
-  cmd: ["deprecated"]
-}
+  cmd: ["deprecated"],
+};
+const types = ["number", "string"];
 
 function delayedHighlight(textarea) {
   //delay only needed for caret
-  highlight(textarea)
+  highlight(textarea);
   //setTimeout(highlight(textarea), 10)
 }
 
-function getAllExtensionContent(){
-  customKeywords.splice(0)
-  for(let extension of window.islExtensions){
-    console.log()
-    customKeywords.push(...Object.keys(extension.keywords))
-    customLabels.push(...extension.labels.map(x => x.label))
+function getAllExtensionContent() {
+  customKeywords.splice(0);
+  for (let extension of window.islExtensions) {
+    console.log();
+    for(let keyword in extension.keywords){
+      let word = extension.keywords[keyword]
+      customKeywords.push(keyword);
+      if(word.deprecated){
+        if(!keyword in warns) warns[keyword] = []
+        warns[keyword].push("deprecated")
+      }
+    }
+    customLabels.push(...extension.labels.map((x) => x.label));
   }
 }
 
 //apply highlights
 function highlight(textarea) {
-  getAllExtensionContent()
-  const div = document.getElementById("txt-bg")
-  const offsetDiv = document.getElementById("offset")
-  const code = textarea.value
+  getAllExtensionContent();
+  const div = document.getElementById("txt-bg");
+  const offsetDiv = document.getElementById("offset");
+  const code = textarea.value;
   const lines = code.split("\n");
-  const converted = lines.map(x => x.replaceAll(/\"[^\"]*\"/g, x => { //String Literals
-    return (x
-      //Add special characters here
-      .replaceAll("\\", "🟥")
-      .replaceAll(" ", "🟧")
-      .replaceAll("[", "🟨")
-      .replaceAll("]", "🟩")
-      .replaceAll(":", "🟪")
-    )
-  }))
-  const highlighted = converted.map(line => {
-    return getLineHighlights(line)
+  const converted = lines.map((x) =>
+    x.replaceAll(/\"[^\"]*\"/g, (x) => {
+      //String Literals
+      return (
+        x
+          //Add special characters here
+          .replaceAll("\\", "🟥")
+          .replaceAll(" ", "🟧")
+          .replaceAll("[", "🟨")
+          .replaceAll("]", "🟩")
+          .replaceAll(":", "🟪")
+      );
+    })
+  );
+  const highlighted = converted.map((line) => {
+    return getLineHighlights(line);
   });
-  div.innerHTML = highlighted.length > 0 ? highlighted.join("<br>"): "<br>";
-  textarea.value = textarea.value.split("\n").map(x => x.trimStart()).join("\n")
+  div.innerHTML = highlighted.length > 0 ? highlighted.join("<br>") : "<br>";
+  textarea.value = textarea.value
+    .split("\n")
+    .map((x) => x.trimStart())
+    .join("\n");
 }
 
 function getLineHighlights(line) {
   if (line.substring(0, 2) === "//") {
-    return `<span class="comment">${line}</span>`
+    return `<span class="comment">${line}</span>`;
   }
   if (line.match(/^\[[^\[\]]*\]$/)) {
-    return `<span class="metatag">${line}</span>`
+    return `<span class="metatag">${line}</span>`;
   }
   const tokens = line.trim().split(" ");
-  const highlightedTokens = tokens.map(token => {
-    return getTokenHighlight(token, tokens)
+  const highlightedTokens = tokens.map((token) => {
+    return getTokenHighlight(token, tokens);
   });
   return highlightedTokens.join(" ");
 }
 
 //get highlights
 function getTokenHighlight(token, allTokens) {
-  let tokenR = token
-  if(token in warns){
-    tokenR = `<span class='warning ${warns[token].join(" ")}'>${token}</span>`
+  let tokenR = token;
+  if (token in warns) {
+    tokenR = `<span class='warning ${warns[token].join(" ")}'>${token}</span>`;
   }
-  let newToken = token
-  newToken = newToken.replaceAll(/"[^"]*"/g, x => {
-    return `<span class="string">${x.replaceAll("\\", "🟥")
+  let newToken = token;
+  newToken = newToken.replaceAll(/"[^"]*"/g, (x) => {
+    return `<span class="string">${x
+      .replaceAll("\\", "🟥")
       .replaceAll(" ", "🟧")
       .replaceAll("[", "🟨")
       .replaceAll("]", "🟩")
       .replaceAll(":", "🟪")
-      .replaceAll("\"", "🟫")
-      .replaceAll("-", "⬛")
-      }</span>`
-  })
-  newToken = newToken.replaceAll(/\\[^\\]*\\/g, x => { return `<span class="getter">${x.replaceAll("\\", "🟥")}</span>` })
-  newToken = newToken.replaceAll(/:(?=<span class="getter">)/g, x => { return `<span class="parameter">🟪</span>` })
-  newToken = newToken.replaceAll(/-(?=<span class="getter">)/g, x => { return `<span class="variable">⬛</span>` })
-  newToken = newToken.replaceAll(/[^\\:]+:[^\\:]+/g, x => { let y = x.replaceAll(":", "🟪"); let z = y.split("🟪"); return `<span class="parameter">${z[0]}</span><span class="type">:${z[1]}</span>` })
+      .replaceAll('"', "🟫")
+      .replaceAll("-", "⬛")}</span>`;
+  });
+  newToken = newToken.replaceAll(/\\[^\\]*\\/g, (x) => {
+    return `<span class="getter">${x.replaceAll("\\", "🟥")}</span>`;
+  });
+  newToken = newToken.replaceAll(/:(?=<span class="getter">)/g, (x) => {
+    return `<span class="parameter">🟪</span>`;
+  });
+  newToken = newToken.replaceAll(/-(?=<span class="getter">)/g, (x) => {
+    return `<span class="variable">⬛</span>`;
+  });
+  newToken = newToken.replaceAll(/[^\\:]+:[^\\:]+/g, (x) => {
+    let y = x.replaceAll(":", "🟪");
+    let z = y.split("🟪");
+    return `<span class="parameter">${z[0]}</span><span class="${
+      types.includes(z[1]) ? "type" : "bad-type error"
+    }">:${z[1]}</span>`;
+  });
   if (variableManipulators.includes(allTokens[allTokens.indexOf(token) - 1])) {
     return `<span class="variable">${tokenR}</span>`;
   }
@@ -179,27 +196,36 @@ function getTokenHighlight(token, allTokens) {
     return `<span class="group">${tokenR}</span>`;
   }
   if (token.match(/^#[0-9a-f]{6}$/)) {
-    return `<span class="colour">${tokenR}</span>`;
+    return `<span class="hex">${tokenR}</span>`;
   }
-  if (operators.includes(token) && allTokens[allTokens.indexOf(token) - 2] === "if") {
+  if (
+    operators.includes(token) &&
+    allTokens[allTokens.indexOf(token) - 2] === "if"
+  ) {
     return `<span class="operator">${tokenR}</span>`;
   }
-  if (token.match(/^[0-9]+$/)) {
+  if (token.match(/^-?[0-9]+(?:\.[0-9]+)?$/)) {
     return `<span class="number">${tokenR}</span>`;
   }
-  if (token.substring(0, 1) === "~" && token.substring(1).match(/^-?[0-9]+$/)) {
-    return `<span class="relative">${tokenR}</span>`
+  if (
+    token.substring(0, 1) === "~" &&
+    token.substring(1).match(/^-?[0-9]+(?:\.[0-9]+)?$/)
+  ) {
+    return `<span class="relative">${tokenR}</span>`;
   }
-  newToken = newToken.
-    replaceAll("🟧", " ").
-    replaceAll("🟥", "\\").
-    replaceAll("🟨", "[").
-    replaceAll("🟩", "]").
-    replaceAll("🟪", ":").
-    replaceAll("🟫", "\"").
-    replaceAll("⬛", "-")
-  if(!newToken.includes("<span class=")){
-    return `<span class="unrecognised error">${newToken}</span>`
+  newToken = newToken
+    .replaceAll("🟧", " ")
+    .replaceAll("🟥", "\\")
+    .replaceAll("🟨", "[")
+    .replaceAll("🟩", "]")
+    .replaceAll("🟪", ":")
+    .replaceAll("🟫", '"')
+    .replaceAll("⬛", "-");
+  if (!newToken.includes("<span class=")) {
+    if (allTokens.indexOf(token) === 0) {
+      return `<span class="unrecognised error">${newToken}</span>`;
+    }
+    return `<span class="unexpected error">${newToken}</span>`;
   }
-  return newToken
+  return newToken;
 }

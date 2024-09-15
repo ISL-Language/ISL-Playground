@@ -41,9 +41,9 @@ canvas {
   content: " ";
   width: 1em;
   height: 1em;
-  background-image: url(/external-link.svg);
+  background-image: url(external-link.svg);
   background-size: 1em;
 }
 .external.red::after{
-  background-image: url(/external-link-red.svg);
+  background-image: url(external-link-red.svg);
 }

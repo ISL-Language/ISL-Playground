@@ -70,8 +70,8 @@
   color: #e27712;
 }
 
-.syntax .colour {
-  color: #c2471e;
+.syntax .hex {
+  color: #ff8056;
 }
 
 .syntax .number {
@@ -169,5 +169,13 @@
 }
 
 .syntax .error.unrecognised:hover::after{
-  content: " ✖ Input not recognised.";
+  content: " ✖ Keyword or label not recognised.";
+}
+
+.syntax .error.unexpected:hover::after{
+  content: " ✖ Unexpected or incorrect input";
+}
+
+.syntax .error.bad-type:hover::after{
+  content: " ✖ Nonexistent type";
 }
