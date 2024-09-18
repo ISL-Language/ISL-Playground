@@ -44,7 +44,7 @@ const keywords = [
   "export",
 ];
 const customKeywords = [];
-const labels = ["non-destructive"];
+const labels = ["non-destructive", "separated", "grouped"];
 const customLabels = [];
 const operators = ["=", "<", ">", "!=", "in"];
 const variableManipulators = [
@@ -73,6 +73,7 @@ const warns = {
   cmd: ["deprecated"],
 };
 const types = ["number", "string"];
+const customTypes = []
 
 function delayedHighlight(textarea) {
   //delay only needed for caret
@@ -82,6 +83,7 @@ function delayedHighlight(textarea) {
 
 function getAllExtensionContent() {
   customKeywords.splice(0);
+  customTypes.splice(0);
   for (let extension of window.islExtensions) {
     console.log();
     for(let keyword in extension.keywords){
@@ -92,6 +94,7 @@ function getAllExtensionContent() {
         warns[keyword].push("deprecated")
       }
     }
+    customTypes.push(...extension.types.map((x) => x.name));
     customLabels.push(...extension.labels.map((x) => x.label));
   }
 }
@@ -125,6 +128,10 @@ function highlight(textarea) {
     .split("\n")
     .map((x) => x.trimStart())
     .join("\n");
+}
+
+function allTypes(){
+  return types.concat(customTypes)
 }
 
 function getLineHighlights(line) {
@@ -171,7 +178,7 @@ function getTokenHighlight(token, allTokens) {
     let y = x.replaceAll(":", "🟪");
     let z = y.split("🟪");
     return `<span class="parameter">${z[0]}</span><span class="${
-      types.includes(z[1]) ? "type" : "bad-type error"
+      allTypes().includes(z[1]) ? "type" : "bad-type error"
     }">:${z[1]}</span>`;
   });
   if (variableManipulators.includes(allTokens[allTokens.indexOf(token) - 1])) {

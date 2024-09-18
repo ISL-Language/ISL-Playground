@@ -1,5 +1,5 @@
-import { ISLInterpreter } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@main/core/interpreter.js";
-import { ISLExtension } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@main/core/extensions.js";
+import { ISLInterpreter } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@v0.1.0-alpha/core/interpreter.js";
+import { ISLExtension } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@v0.1.0-alpha/core/extensions.js";
 import { ISLFileLoader } from "./loader.js";
 /** @type { ISLInterpreter } */
 const interp = new ISLInterpreter({
