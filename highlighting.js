@@ -42,14 +42,16 @@ const keywords = [
   "delete",
   "import",
   "export",
+  //uhhh
+  "as",
+  "to"
 ];
 const customKeywords = [];
 const labels = ["non-destructive", "separated", "grouped"];
 const customLabels = [];
-const operators = ["=", "<", ">", "!=", "in"];
+const operators = ["=", "<", ">", "!=", "in", "!in"];
 const variableManipulators = [
   "var",
-
   "add",
   "subtract",
   "multiply",
@@ -62,9 +64,14 @@ const variableManipulators = [
   "number",
   "set",
   "delete",
+  "as",
+  "to"
+];
+const multiModeManipulators = [
   "getkeys",
   "awaitkey",
-];
+  "popup-input",
+]
 const functionManipulators = ["cmd", "function", "end", "execute"];
 const warns = {
   declare: ["deprecated", "no-type"],
@@ -72,7 +79,7 @@ const warns = {
   webprompt: ["deprecated"],
   cmd: ["deprecated"],
 };
-const types = ["number", "string"];
+const types = ["number", "string", "boolean", "group", "relpos"];
 const customTypes = []
 
 function delayedHighlight(textarea) {
@@ -174,14 +181,14 @@ function getTokenHighlight(token, allTokens) {
   newToken = newToken.replaceAll(/-(?=<span class="getter">)/g, (x) => {
     return `<span class="variable">⬛</span>`;
   });
-  newToken = newToken.replaceAll(/[^\\:]+:[^\\:]+/g, (x) => {
+  newToken = newToken.replaceAll(/[^\\:]+(?<!\.):[^\\:]+/g, (x) => {
     let y = x.replaceAll(":", "🟪");
     let z = y.split("🟪");
     return `<span class="parameter">${z[0]}</span><span class="${
       allTypes().includes(z[1]) ? "type" : "bad-type error"
     }">:${z[1]}</span>`;
   });
-  if (variableManipulators.includes(allTokens[allTokens.indexOf(token) - 1])) {
+  if (variableManipulators.includes(allTokens[allTokens.indexOf(token) - 1]) || multiModeManipulators.includes(allTokens[allTokens.indexOf(token) - 2])) {
     return `<span class="variable">${tokenR}</span>`;
   }
   if (functionManipulators.includes(allTokens[allTokens.indexOf(token) - 1])) {
@@ -202,7 +209,7 @@ function getTokenHighlight(token, allTokens) {
   if (token.match(/^\[[^\[\]]*\]$/)) {
     return `<span class="group">${tokenR}</span>`;
   }
-  if (token.match(/^#[0-9a-f]{6}$/)) {
+  if (token.match(/^#[0-9a-f]{6}([0-9a-f]{2})?$/)) {
     return `<span class="hex">${tokenR}</span>`;
   }
   if (
@@ -213,6 +220,9 @@ function getTokenHighlight(token, allTokens) {
   }
   if (token.match(/^-?[0-9]+(?:\.[0-9]+)?$/)) {
     return `<span class="number">${tokenR}</span>`;
+  }
+  if (token === "true" || token === "false") {
+    return `<span class="bool">${tokenR}</span>`;
   }
   if (
     token.substring(0, 1) === "~" &&

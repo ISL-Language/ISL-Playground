@@ -1,11 +1,11 @@
-import { ISLInterpreter } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@v0.1.0-alpha/core/interpreter.js";
-import { ISLExtension } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@v0.1.0-alpha/core/extensions.js";
+import { ISLInterpreter } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@latest/core/interpreter.js";
 import { ISLFileLoader } from "./loader.js";
 /** @type { ISLInterpreter } */
 const interp = new ISLInterpreter({
   name: "ISL Playground",
   instructions: 30,
   haltOnDisallowedOperation: true,
+  allowCommunicationDefault: true,
   onerror: error,
   onwarn: warn,
   onlog: log,
@@ -27,23 +27,29 @@ function go() {
   interp.stopExecution();
   interp.loadISL(input.value.split("\n"), "<user input>");
   interp.startExecution(speedInput.value ?? 1, instructionsInput.value ?? 1);
+  console.log("Started!")
 }
 function restart() {
+  console.log("Restarting...")
   interp.stopExecution();
   interp.startExecution(speedInput.value ?? 1, instructionsInput.value ?? 1);
 }
 
 function stop() {
+  console.log("Stopped!")
   interp.stopExecution();
 }
 function pause() {
+  console.log("Paused...")
   interp.pauseExecution();
 }
 function resume() {
+  console.log("...Resumed")
   interp.startExecution();
 }
 function clear() {
-  interp.loadISL([], "<cleared>");
+  console.log("Cleared!")
+  interp.clear()
 }
 function giveButtonFunction(id, func) {
   document.getElementById(id).onclick = () => {
@@ -307,7 +313,7 @@ async function requestModule(url) {
           const extension = module[extName];
           if (extension) {
             if (isClass(extension)) {
-              if (extension.prototype instanceof ISLExtension) {
+              if (extension.__proto__.name === "ISLExtension") {
                 const instance = new extension(new ISLInterpreter());
                 imported.push({
                   ext: extension,
@@ -317,7 +323,7 @@ async function requestModule(url) {
                   source: url
                 });
               }
-            } else if (extension instanceof ISLExtension) {
+            } else if (extension[Symbol.toStringTag] === "ISLExtension") {
               imported.push({
                 ext: extension,
                 name: extName,
@@ -354,7 +360,7 @@ async function requestSpecificExtension(url, extName) {
         const extension = module[extName];
         if (extension) {
           if (isClass(extension)) {
-            if (!(extension.prototype instanceof ISLExtension)) {
+            if (!(extension.__proto__.name === "ISLExtension")) {
               reject("Imported class is not an extension!");
             } else {
               const instance = new extension(new ISLInterpreter());
@@ -366,7 +372,7 @@ async function requestSpecificExtension(url, extName) {
                 source: url
               });
             }
-          } else if (extension instanceof ISLExtension) {
+          } else if (extension[Symbol.toStringTag] === "ISLExtension") {
             resolve({
               ext: extension,
               name: extName,

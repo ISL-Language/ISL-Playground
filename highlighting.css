@@ -62,6 +62,10 @@
   color: #2a65dc;
 }
 
+.syntax .bool {
+  color: #507eda;
+}
+
 .syntax .custom.keyword {
   color: #a941ff;
 }
