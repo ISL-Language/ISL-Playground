@@ -10,24 +10,37 @@ const keywords = [
   "var",
   "cmd",
   "webprompt",
+  "flush",
   //vars
   "string",
   "number",
+  "boolean",
+  "object",
+  "group",
   //functions
   "function",
   "end",
   "execute",
+  //classes
+  "class",
+  "#",
+  "create",
   //flow control
   "if",
+  "else",
+  "|",
   "jump",
   "stop",
   "rundelay",
+  "restart",
+  "iterate",
   //IO
   "awaitkey",
   "getkeys",
   "popup-input",
   "log",
-  "flush",
+  "warn",
+  "error",
   //operators
   "add",
   "subtract",
@@ -44,10 +57,14 @@ const keywords = [
   "export",
   //uhhh
   "as",
-  "to"
+  "to",
+  "on",
+  "with",
+  "=",
+  "type",
 ];
 const customKeywords = [];
-const labels = ["non-destructive", "separated", "grouped"];
+const labels = ["non-destructive", "separated", "grouped", "temporary"];
 const customLabels = [];
 const operators = ["=", "<", ">", "!=", "in", "!in"];
 const variableManipulators = [
@@ -62,30 +79,112 @@ const variableManipulators = [
   "round",
   "string",
   "number",
+  "boolean",
+  "object",
   "set",
   "delete",
   "as",
-  "to"
+  "to",
+  "on",
+  "iterate",
+  "#",
+  "create",
 ];
-const multiModeManipulators = [
-  "getkeys",
-  "awaitkey",
-  "popup-input",
-]
-const functionManipulators = ["cmd", "function", "end", "execute"];
+const multiModeManipulators = ["getkeys", "awaitkey", "popup-input", "|"];
+const functionManipulators = ["cmd", "function", "end", "execute", "with"];
+const classManipulators = ["class", "type"];
 const warns = {
   declare: ["deprecated", "no-type"],
   var: ["no-type"],
   webprompt: ["deprecated"],
   cmd: ["deprecated"],
+  flush: ["deprecated"],
 };
-const types = ["number", "string", "boolean", "group", "relpos"];
-const customTypes = []
+const types = ["number", "string", "boolean", "group", "relpos", "object"];
+const customTypes = [];
+const undoStack = [];
+const redoStack = [];
+/**@type {HTMLTextAreaElement} */
+let inp = document.getElementById("input");
+/**@type {HTMLDivElement} */
+let oup = document.getElementById("txt-bg");
 
+function focusEditor() {
+  inp.focus();
+}
+
+inp.addEventListener("keydown", (ev) => {
+  let actioned = false;
+  let insert = function (charBef, charAft, withoutSelection = false) {
+    if (inp.selectionStart !== inp.selectionEnd) {
+      let srt = inp.selectionStart;
+      let end = inp.selectionEnd;
+      let before = inp.value.substring(0, srt);
+      let middle = inp.value.substring(srt, end);
+      let after = inp.value.substring(end);
+      inp.value = before + charBef + middle + (charAft ?? charBef) + after;
+      inp.selectionStart = srt + 1;
+      inp.selectionEnd = end + 1;
+      actioned = true;
+    } else if (withoutSelection) {
+      inp.value += charBef + (charAft ?? charBef);
+      inp.selectionStart--;
+      inp.selectionEnd--;
+      actioned = true;
+    }
+  };
+  if (ev.key === "[") {
+    insert("[", "]", true);
+  }
+  if (ev.key === "(") {
+    insert("(", ")", true);
+  }
+  if (ev.key === '"') {
+    insert('"', undefined, true);
+  }
+  if (ev.key === "|") {
+    inp.value += "\n| ";
+    actioned = true;
+  }
+  if (ev.key === "#") {
+    inp.value += "\n# ";
+    actioned = true;
+  }
+  if (ev.key === "\\") {
+    insert("\\");
+  }
+
+  if (actioned) {
+    ev.preventDefault();
+    delayedHighlight(inp);
+  }
+  //Undo stack thing
+  if (ev.key === "z" && ev.ctrlKey) {
+    let undoVal = undoStack.pop();
+    //Undo!!!1!!
+    if (undoVal) {
+      redoStack.push(inp.value);
+      inp.value = undoVal;
+    }
+  } else if (ev.key === "y" && ev.ctrlKey) {
+    let redoVal = redoStack.pop();
+    //Redo!!!1!!
+    if (redoVal) {
+      undoStack.push(inp.value);
+      inp.value = redoVal;
+    }
+  } else if (undoStack.at(-1) !== inp.value) {
+    undoStack.push(inp.value);
+    //Can't redo anymore
+    redoStack.splice(0);
+  }
+});
+
+/**
+ * @param {HTMLTextAreaElement} textarea
+ */
 function delayedHighlight(textarea) {
-  //delay only needed for caret
   highlight(textarea);
-  //setTimeout(highlight(textarea), 10)
 }
 
 function getAllExtensionContent() {
@@ -93,12 +192,12 @@ function getAllExtensionContent() {
   customTypes.splice(0);
   for (let extension of window.islExtensions) {
     console.log();
-    for(let keyword in extension.keywords){
-      let word = extension.keywords[keyword]
+    for (let keyword in extension.keywords) {
+      let word = extension.keywords[keyword];
       customKeywords.push(keyword);
-      if(word.deprecated){
-        if(!keyword in warns) warns[keyword] = []
-        warns[keyword].push("deprecated")
+      if (word.deprecated) {
+        if (!keyword in warns) warns[keyword] = [];
+        warns[keyword].push("deprecated");
       }
     }
     customTypes.push(...extension.types.map((x) => x.name));
@@ -124,6 +223,7 @@ function highlight(textarea) {
           .replaceAll("[", "🟨")
           .replaceAll("]", "🟩")
           .replaceAll(":", "🟪")
+          .replaceAll("-", "⬛")
       );
     })
   );
@@ -137,8 +237,8 @@ function highlight(textarea) {
     .join("\n");
 }
 
-function allTypes(){
-  return types.concat(customTypes)
+function allTypes() {
+  return types.concat(customTypes);
 }
 
 function getLineHighlights(line) {
@@ -188,11 +288,27 @@ function getTokenHighlight(token, allTokens) {
       allTypes().includes(z[1]) ? "type" : "bad-type error"
     }">:${z[1]}</span>`;
   });
-  if (variableManipulators.includes(allTokens[allTokens.indexOf(token) - 1]) || multiModeManipulators.includes(allTokens[allTokens.indexOf(token) - 2])) {
+  if (
+    operators.includes(token) &&
+    allTokens[allTokens.indexOf(token) - 2] === "if"
+  ) {
+    return `<span class="operator">${tokenR}</span>`;
+  }
+  if (keywords.includes(token)) {
+    return `<span class="keyword">${tokenR}</span>`;
+  }
+
+  if (
+    variableManipulators.includes(allTokens[allTokens.indexOf(token) - 1]) ||
+    multiModeManipulators.includes(allTokens[allTokens.indexOf(token) - 2])
+  ) {
     return `<span class="variable">${tokenR}</span>`;
   }
   if (functionManipulators.includes(allTokens[allTokens.indexOf(token) - 1])) {
     return `<span class="function">${tokenR}</span>`;
+  }
+  if (classManipulators.includes(allTokens[allTokens.indexOf(token) - 1])) {
+    return `<span class="class">${tokenR}</span>`;
   }
   if (labels.includes(token)) {
     return `<span class="label">${tokenR}</span>`;
@@ -200,24 +316,17 @@ function getTokenHighlight(token, allTokens) {
   if (customLabels.includes(token)) {
     return `<span class="custom label">${tokenR}</span>`;
   }
-  if (keywords.includes(token)) {
-    return `<span class="keyword">${tokenR}</span>`;
-  }
   if (customKeywords.includes(token)) {
     return `<span class="custom keyword">${tokenR}</span>`;
   }
+
   if (token.match(/^\[[^\[\]]*\]$/)) {
     return `<span class="group">${tokenR}</span>`;
   }
   if (token.match(/^#[0-9a-f]{6}([0-9a-f]{2})?$/)) {
     return `<span class="hex">${tokenR}</span>`;
   }
-  if (
-    operators.includes(token) &&
-    allTokens[allTokens.indexOf(token) - 2] === "if"
-  ) {
-    return `<span class="operator">${tokenR}</span>`;
-  }
+
   if (token.match(/^-?[0-9]+(?:\.[0-9]+)?$/)) {
     return `<span class="number">${tokenR}</span>`;
   }

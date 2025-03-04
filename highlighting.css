@@ -79,7 +79,7 @@
 }
 
 .syntax .number {
-  color: #51df95;
+  color: #43bb7d;
 }
 
 .syntax .relative {
@@ -88,6 +88,10 @@
 
 .syntax .type {
   color: #00ffd5;
+}
+
+.syntax .class {
+  color: #76e657;
 }
 
 .syntax .parameter {

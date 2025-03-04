@@ -152,6 +152,7 @@
               <span class="getter">\getter\</span><br>
               <span class="variable">variable</span><br>
               <span class="function">function</span><br>
+              <span class="class">class</span><br>
               <span class="parameter">parameter</span><span class="type">:type</span><br>
               <span class="operator">comparator</span><br>
               <span class="group">[gr|ou|p]</span><br>
@@ -163,7 +164,7 @@
               <textarea id="input" placeholder="Enter ISL code here" class="syntax box textbox" cols="80" rows="20"
                 oninput="delayedHighlight(this)" onkeydown="delayedHighlight(this)" onclick="delayedHighlight(this)"
                 autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-              <div id="txt-bg" class="syntax bg textbox" onclick="document.getElementById('input').focus()">
+              <div id="txt-bg" class="syntax bg textbox" onfocus="focusEditor()" onclick="focusEditor()" ontouchstart="focusEditor()">
                 <!-- All the processed text goes in here -->
               </div>
               <div id="offset"></div>

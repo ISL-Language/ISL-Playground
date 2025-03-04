@@ -1,4 +1,4 @@
-import { ISLInterpreter } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@v0.2.0-alpha/core/interpreter.js";
+import { ISLInterpreter } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@v0.3.1-alpha.2/core/interpreter.js";
 import { ISLFileLoader } from "./loader.js";
 /** @type { ISLInterpreter } */
 const interp = new ISLInterpreter({
