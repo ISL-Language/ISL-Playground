@@ -86,7 +86,7 @@ const variableManipulators = [
   "as",
   "to",
   "on",
-  "iterate",
+  "group",
   "#",
   "create",
 ];
